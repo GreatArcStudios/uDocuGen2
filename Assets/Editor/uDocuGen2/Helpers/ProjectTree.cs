@@ -17,7 +17,7 @@ namespace uDocumentGenerator.helpers
             filesList = new FileTree(cleandedList);
         }
         /// <summary>
-        /// Recursively generate the list of c# files 
+        /// Recursively generate the flattened list of c# files paths
         /// </summary>
         /// <param name="fPath"></param>
         /// <returns></returns>

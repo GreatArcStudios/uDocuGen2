@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace uDocumentGenerator.helpers
 {
@@ -12,16 +10,54 @@ namespace uDocumentGenerator.helpers
     /// </summary>
     public class FileTree
     {
-        public List<List<string>> subDir = new List<List<string>>();
-        public List<string> currentDirectory = new List<string>();
+        public List<FileTree> subDir = new List<FileTree>();
+        public string currentDirectory;
         public List<string> filePath;
         public FileTree(List<string> fPath)
         {
             filePath = fPath;
+            BuildTree();
         }
-        private void buildTree()
+        public FileTree(string subDirectoryPath)
         {
-             
+            filePath.Add(subDirectoryPath);
+        }
+        private void BuildTree()
+        {
+            foreach(string fp in filePath)
+            {
+                // if there are more branches to construct
+                if (fp.Contains("\\"))
+                {
+                    var matches = Regex.Match(fp, "\\[^\\]*\\");
+                    if (matches.Success)
+                    {
+                        currentDirectory = matches.Value.Substring(1,matches.Value.Length-2);
+                        FileTree subDirectory = new FileTree(fp.Substring(currentDirectory.Length+1));
+                        bool existInSubDir = false; 
+                        for (int i = 0; i < subDir.Count; i++)
+                        {
+                            if(subDir[i].currentDirectory == subDirectory.currentDirectory)
+                            {
+                                subDir[i].subDir.AddRange(subDirectory.subDir);
+                                existInSubDir = true;
+                                break; 
+                            }
+                        }
+                        if (!existInSubDir)
+                        {
+                            subDir.Add(subDirectory);
+                        }
+                    }
+                }
+                else
+                {
+                    //return when we reach a file
+                    currentDirectory = fp;
+                    return;
+                }
+            }
+            
         }
     }
 }

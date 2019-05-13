@@ -1,21 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
+﻿
 namespace uDocumentGenerator.generation
 {
-    public class DocGen : MonoBehaviour
+    public class DocGen
     {
 
-        // Use this for initialization
-        void Start()
+        public void Generate()
         {
 
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
 
         }
     }

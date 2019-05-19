@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using UnityEngine;
 
-namespace uDocumentGenerator.helpers
+namespace uDocumentGenerator.Helpers
 {
     /// <summary>
     /// Provides a list of c# files that should be analyzed. 
@@ -9,12 +10,15 @@ namespace uDocumentGenerator.helpers
     public class ProjectTree
     {
         public string folderPath;
-        public FileTree filesList;
+        public FileTree fileTree;
+        public List<string> fileList; 
         public ProjectTree(string fPath)
         {
             folderPath = fPath;
             var cleandedList = TextSanitizer.RemoveApplicationPath(GenerateFileList(folderPath));
-            filesList = new FileTree(cleandedList);
+            Debug.Log(string.Join(",", cleandedList.ToArray()));
+            fileList = cleandedList;
+            fileTree = new FileTree(cleandedList);
         }
         /// <summary>
         /// Recursively generate the flattened list of c# files paths
@@ -45,6 +49,7 @@ namespace uDocumentGenerator.helpers
                     subList.AddRange(returnedList);
                 }
             }
+            TextSanitizer.ReverseSlashes(subList);
             return subList;
         }
         private List<string> FindcsharpFiles(string fPath)

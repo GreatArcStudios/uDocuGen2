@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
+using UnityEngine;
 
-namespace uDocumentGenerator.helpers
+namespace uDocumentGenerator.Helpers
 {
     /// <summary>
     /// The tree is formatted as follows: 
@@ -17,47 +19,99 @@ namespace uDocumentGenerator.helpers
         {
             filePath = fPath;
             BuildTree();
+            Debug.Log(ToString());
         }
         public FileTree(string subDirectoryPath)
         {
+            filePath = new List<string>();
             filePath.Add(subDirectoryPath);
+            BuildTree();
         }
         private void BuildTree()
         {
-            foreach(string fp in filePath)
+            foreach (string fp in filePath)
             {
                 // if there are more branches to construct
-                if (fp.Contains("\\"))
+                if (Regex.Matches(fp, @"\\[^\\]*\\").Count > 1)
                 {
-                    var matches = Regex.Match(fp, "\\[^\\]*\\");
-                    if (matches.Success)
+                    var match = Regex.Match(fp, @"\\[^\\]*\\");
+                    //Debug.Log(matches);
+                    if (match.Success)
                     {
-                        currentDirectory = matches.Value.Substring(1,matches.Value.Length-2);
-                        FileTree subDirectory = new FileTree(fp.Substring(currentDirectory.Length+1));
-                        bool existInSubDir = false; 
-                        for (int i = 0; i < subDir.Count; i++)
+                        var matchedDirectory = match.Value.Substring(1, match.Value.Length - 2);
+                        FileTree subDirectory;
+
+                        // if the current directory matches the matched directory check for more common subdirectories
+                        // then add the new subDirectory into the subDir of the lastCommonDirectory FileTree
+                        if (currentDirectory == matchedDirectory)
                         {
-                            if(subDir[i].currentDirectory == subDirectory.currentDirectory)
+                            // insert a FileTree in the subdir of lastCommomDirectory
+                            FileTree lastCommonDirectory = this;
+                            // this will have the file path that isn't common with the rest
+                            string addPath = fp;
+                            var nextFolder = Regex.Match(addPath.Substring(currentDirectory.Length + 1), @"\\[^\\]*\\");
+                            var containsNextStep = false;
+                            while (containsNextStep)
                             {
-                                subDir[i].subDir.AddRange(subDirectory.subDir);
-                                existInSubDir = true;
-                                break; 
+                                //check if subtrees have next step of the path 
+                                for (var i = 0; i < lastCommonDirectory.subDir.Count; i++)
+                                {
+                                    // substr of nextFolder gets rid of slashes
+                                    if (lastCommonDirectory.subDir[i].currentDirectory == nextFolder.Value.Substring(1, nextFolder.Value.Length - 2))
+                                    {
+                                        containsNextStep = true;
+                                        lastCommonDirectory = lastCommonDirectory.subDir[i];
+                                        addPath = addPath.Substring(nextFolder.Length + 1);
+                                        nextFolder = Regex.Match(addPath.Substring(nextFolder.Length + 1), @"\\[^\\]*\\");
+                                        break;
+                                    }
+                                }
+                                // we know that there were no more commonalities in that step 
+                                if (!containsNextStep)
+                                {
+                                    break;
+                                }
                             }
+                            subDirectory = new FileTree(addPath);
+                            lastCommonDirectory.subDir.Add(subDirectory);
                         }
-                        if (!existInSubDir)
+                        else
                         {
-                            subDir.Add(subDirectory);
+                            currentDirectory = matchedDirectory;
+                            subDirectory = new FileTree(fp.Substring(currentDirectory.Length + 1));
                         }
                     }
                 }
                 else
                 {
                     //return when we reach a file
-                    currentDirectory = fp;
+                    currentDirectory = fp.Substring(1);
                     return;
                 }
             }
-            
+
+        }
+        private string strFormated(int depth = 0) 
+        {
+            var formatted_str = "";
+            if (subDir.Count == 0)
+            {
+                return " ";
+            }
+            else
+            {
+                formatted_str = string.Concat(Enumerable.Repeat(" ", depth)) + $"{currentDirectory}\n"; 
+                foreach(var subDirectroy in subDir)
+                {
+                    formatted_str += subDirectroy.strFormated(depth++);
+                }
+            }
+            return formatted_str;
+        }
+        public override string ToString()
+        {
+
+            return strFormated();
         }
     }
 }

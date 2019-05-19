@@ -1,13 +1,16 @@
 ﻿
-namespace uDocumentGenerator.generation
-{
+namespace uDocumentGenerator.Generation
+{  
+    /// <summary>
+    /// Generates a JSON file  
+    /// </summary>
     public class DocGen
     {
-
-        public void Generate()
+        Helpers.ProjectTree projectTree;
+        
+        public static void Generate(string filePath)
         {
-
-
+            
         }
     }
 

@@ -41,7 +41,7 @@ namespace uDocumentGenerator.Helpers
             var cleanedString = toProcess;
             foreach(var character in removeChars)
             {
-                cleanedString = cleanedString.Replace(character, "");
+                cleanedString = cleanedString.Replace(character.ToString(), "");
             }
             return cleanedString;
 

@@ -34,105 +34,13 @@ namespace uDocumentGenerator.Generation
             ExtractVariables();
             ExtractFunctions();
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        //private void ExtractFunctions()
-        //{
-        //    streamReader.DiscardBufferedData();
-        //    streamReader.BaseStream.Seek(0, SeekOrigin.Begin);
-        //    string line = streamReader.ReadLine();
-        //    var inComment = false;
-        //    var comments = new List<(string, string)>();
-        //    var currentComment = "";
-        //    var nextLines = "";
-        //    while (true)
-        //    {
-        //        line = streamReader.ReadLine();
-        //        if (line != null)
-        //        {
-        //            line = Helpers.TextSanitizer.RemoveCharacters(line, new char[] { '\t', ' ' });
 
-        //        }
-        //        else
-        //        {
-        //            return;
-        //        }
-
-        //        if (line.StartsWith("///") || line.StartsWith("//") || line.StartsWith("/*"))
-        //        {
-        //            if (line.StartsWith("/*"))
-        //            {
-        //                inComment = true;
-        //                while (!line.StartsWith("*/"))
-        //                {
-        //                    currentComment += line.Replace("*", "");
-        //                    line = streamReader.ReadLine();
-        //                    if (line != null)
-        //                    {
-        //                        line = Helpers.TextSanitizer.RemoveCharacters(line, new char[] { '\t', ' ' });
-        //                    }
-        //                    else
-        //                    {
-        //                        return;
-
-        //                    }
-        //                }
-        //                // find the next non whitespace line 
-        //                Regex regex = new Regex(@"\s+");
-        //                while (true)
-        //                {
-        //                    line = regex.Replace(line, "");
-        //                    if (line.Length > 0)
-        //                    {
-        //                        break;
-        //                    }
-        //                    line = streamReader.ReadLine();
-        //                    if (line != null)
-        //                    {
-        //                        line = Helpers.TextSanitizer.RemoveCharacters(line, new char[] { '\t', ' ' });
-        //                    }
-        //                    else
-        //                    {
-        //                        return;
-
-        //                    }
-        //                }
-        //                VerifyFunction(line);
-        //                inComment = false;
-        //            }
-        //            else
-        //            {
-        //                inComment = true;
-        //                currentComment += line.Replace("///", "").Replace("<summary>", "");
-        //            }
-
-        //        }
-        //        else if (inComment)
-        //        {
-        //            inComment = false;
-        //            var nextNonblankLine = "";
-        //            while (true)
-        //            {
-        //                if ()
-        //                {
-
-        //                }
-        //            }
-        //            comments.Add((currentComment, ));
-        //        }
-        //    }
-        //}
-        //private void VerifyFunction(string line)
-        //{
-
-        //}
         private void ExtractFunctions()
         {
 
             Type classType = Type.GetType(nameSpace + "." + className);
             var methodInfos = classType.GetMethods();
-            var textArray = File.ReadAllLines(filePath);
+            var textArray = File.ReadAllLines(filePath).ToList();
             foreach (var method in methodInfos)
             {
                 string methodScope = "default";
@@ -152,7 +60,7 @@ namespace uDocumentGenerator.Generation
                 if (method.IsAbstract)
                     modifiers.Add("abstract");
                 var parameters = method.GetParameters();
-                foreach(var parameter in parameters)
+                foreach (var parameter in parameters)
                 {
                     var param_name = parameter.Name;
                     var param_type = parameter.ParameterType;
@@ -162,8 +70,70 @@ namespace uDocumentGenerator.Generation
                         param_default_value = parameter.DefaultValue;
                     }
                     parameter_list.Add((param_name, param_type.ToString(), param_default_value));
-                } 
-                
+                }
+                // correctIndicies[0] is the index of the func name, correctIndicies[1] is where the scope is located, correctIndicies[2] is where the { is 
+                var correctIndicies = new int[3];
+                while (true)
+                {
+                    var firstOccurance = textArray.IndexOf(name);
+                    var aboveIndex = firstOccurance;
+                    var belowIndex = firstOccurance;
+                    var linesAbove = new List<string>();
+                    var linesBelow = new List<string>();
+                    var combinedLines = new List<string>();
+                    var matched_line = "";
+                    // check for scope and check above
+                    while (aboveIndex >= 0)
+                    {
+                        if (textArray[aboveIndex].Contains(methodScope))
+                        {
+                            linesAbove.Add(textArray[aboveIndex]);
+                            break;
+                        }
+                        linesAbove.Add(textArray[aboveIndex]);
+                        aboveIndex--;
+                    }
+                    // check below for {
+                    while(belowIndex < textArray.Count)
+                    {
+                        if (textArray[belowIndex].Contains("{"))
+                        {
+                            linesBelow.Add(textArray[belowIndex]);
+                            break;
+                        }
+                        linesBelow.Add(textArray[belowIndex]);
+                        belowIndex++;
+                    }
+                    combinedLines.AddRange(linesAbove);
+                    combinedLines.AddRange(linesBelow);
+                    foreach(var line in combinedLines)
+                    {
+                        matched_line += line; 
+                    }
+                    matched_line = Helpers.TextSanitizer.RemoveCharacters(matched_line, new char[] { '\t', ' ' });
+                    var open_parenthesis = matched_line.IndexOf("(");
+                    var close_parenthesis = matched_line.IndexOf(")");
+                    var param_list = matched_line.Substring(open_parenthesis + 1, close_parenthesis - 1 - (open_parenthesis + 1)).Split(',');
+                    var matched_function = true;
+                    for(int i = 0; i < param_list.Length; i++)
+                    {
+                        if (!parameter_list[i].Item2.Contains(param_list[i]))
+                        {
+                            matched_function = false;
+                            break;
+                        }
+                    }
+                    if (matched_function)
+                    {
+                        correctIndicies[0] = firstOccurance;
+                        correctIndicies[1] = aboveIndex;
+                        correctIndicies[2] = belowIndex;
+                        break;
+                    }
+                    textArray = textArray.Skip(firstOccurance + 1).ToList();
+                }
+                // we've gotten the correct indicies of the correct function now.
+
             }
         }
 
@@ -387,7 +357,7 @@ namespace uDocumentGenerator.Generation
                 isAbstract = true;
                 return line.Substring(line.IndexOf("struct") + "struct".Length);
             }
-            else 
+            else
             {
                 return "NO CLASS NAME DETECTED";
             }

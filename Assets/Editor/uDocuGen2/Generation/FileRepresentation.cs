@@ -34,7 +34,6 @@ namespace uDocumentGenerator.Generation
             ExtractVariables();
             ExtractFunctions();
         }
-
         private void ExtractFunctions()
         {
 
@@ -73,9 +72,13 @@ namespace uDocumentGenerator.Generation
                 }
                 // correctIndicies[0] is the index of the func name, correctIndicies[1] is where the scope is located, correctIndicies[2] is where the { is 
                 var correctIndicies = new int[3];
+                var firstOccurance = textArray.IndexOf(name);
                 while (true)
                 {
-                    var firstOccurance = textArray.IndexOf(name);
+                    if (firstOccurance == -1)
+                    {
+                        break;
+                    }
                     var aboveIndex = firstOccurance;
                     var belowIndex = firstOccurance;
                     var linesAbove = new List<string>();
@@ -94,7 +97,7 @@ namespace uDocumentGenerator.Generation
                         aboveIndex--;
                     }
                     // check below for {
-                    while(belowIndex < textArray.Count)
+                    while (belowIndex < textArray.Count)
                     {
                         if (textArray[belowIndex].Contains("{"))
                         {
@@ -106,18 +109,18 @@ namespace uDocumentGenerator.Generation
                     }
                     combinedLines.AddRange(linesAbove);
                     combinedLines.AddRange(linesBelow);
-                    foreach(var line in combinedLines)
+                    foreach (var line in combinedLines)
                     {
-                        matched_line += line; 
+                        matched_line += line;
                     }
                     matched_line = Helpers.TextSanitizer.RemoveCharacters(matched_line, new char[] { '\t', ' ' });
                     var open_parenthesis = matched_line.IndexOf("(");
                     var close_parenthesis = matched_line.IndexOf(")");
                     var param_list = matched_line.Substring(open_parenthesis + 1, close_parenthesis - 1 - (open_parenthesis + 1)).Split(',');
                     var matched_function = true;
-                    for(int i = 0; i < param_list.Length; i++)
+                    for (int i = 0; i < param_list.Length; i++)
                     {
-                        if (!parameter_list[i].Item2.Contains(param_list[i]))
+                        if (!parameter_list[i].Item2.ToLower().Contains(param_list[i].ToLower()))
                         {
                             matched_function = false;
                             break;
@@ -130,10 +133,33 @@ namespace uDocumentGenerator.Generation
                         correctIndicies[2] = belowIndex;
                         break;
                     }
-                    textArray = textArray.Skip(firstOccurance + 1).ToList();
+                    firstOccurance = textArray.IndexOf(name, firstOccurance + 1);
                 }
                 // we've gotten the correct indicies of the correct function now.
-
+                var description = "";
+                for (int i = correctIndicies[1]; i >= 0; i--)
+                {
+                    var commentTypes = new string[] { "///", "//", "/*", "*", "*/"};
+                    // break when it's no longer a comment
+                    if (Helpers.TextSanitizer.FindCommentType(textArray[i], commentTypes) == - 1)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        description += " " + textArray[i].Replace(commentTypes[Helpers.TextSanitizer.FindCommentType(textArray[i], commentTypes)], "").Trim();
+                    }
+                }
+                FunctionRepresentation function = new FunctionRepresentation(methodScope, description, modifiers, parameter_list, name);
+                if (functions.ContainsKey(methodScope))
+                {
+                    functions[methodScope].Add(function);
+                }
+                else
+                {
+                    functions[methodScope] = new List<FunctionRepresentation>();
+                    functions[methodScope].Add(function);
+                }
             }
         }
 
@@ -153,7 +179,7 @@ namespace uDocumentGenerator.Generation
                 if (bracketcount <= 2 && nameSpace != "")
                 {
                     // we know that before the constructor we will have at most 2 brackets with variables placed before the constructor
-                    if (line.Contains(";"))
+                    if (line.EndsWith(";"))
                     {
                         VarHelper(line);
                     }
@@ -161,17 +187,17 @@ namespace uDocumentGenerator.Generation
                 else
                 {
                     // we know we've entered a function if a line contains a { but not a ;
-                    if (line.Contains("{") && !line.Contains(";"))
+                    if (line.EndsWith("{") && !line.EndsWith(";"))
                     {
                         inFunction = true;
                     }
                     // we know we've exited a function if a line contains a } but not a ;
-                    else if (line.Contains("}") && !line.Contains(";"))
+                    else if (line.EndsWith("}") && !line.EndsWith(";"))
                     {
                         inFunction = false;
                         continue;
                     }
-                    else if (!inFunction && line.Contains(";"))
+                    else if (!inFunction && line.EndsWith(";"))
                     {
                         VarHelper(line);
                     }
@@ -260,7 +286,7 @@ namespace uDocumentGenerator.Generation
                     line = Helpers.TextSanitizer.RemoveCharacters(line, new char[] { '\t', ';', ' ' });
                 }
 
-                if (!line.Contains("using"))
+                if (!line.StartsWith("using"))
                 {
                     break;
                 }
@@ -287,19 +313,30 @@ namespace uDocumentGenerator.Generation
                     return;
                 }
                 // extracts the class description is there is one
-                if (line.StartsWith("///") || line.StartsWith("//"))
+                if (line.StartsWith("///") || line.StartsWith("//") || line.StartsWith("/*") || (line.StartsWith("*") && inComment) || line.StartsWith("*/"))
                 {
+
                     inComment = true;
-                    currentComment += line.Replace("///", "").Replace("<summary>", "");
+                    if(line.StartsWith("///"))
+                        currentComment += line.Replace("///", "").Replace("<summary>", "");
+                    else if(line.StartsWith("//"))
+                        currentComment += line.Replace("//", "");
+                    else if(line.StartsWith("/*"))
+                        currentComment += line.Replace("/*", "");
+                    else if (line.StartsWith("*"))
+                        currentComment += line.Replace("*", "");
+                    else if (line.StartsWith("*/"))
+                        currentComment += line.Replace("*/", "");
+                    continue;
                 }
                 // if the previous line was a comment then inComment will still be true
-                else if (inComment)
+                if (inComment)
                 {
                     inComment = false;
                     comments.Add(currentComment);
                 }
 
-                if (line.Contains("class") || line.Contains("interface") || line.Contains("abstract") || line.Contains("struct"))
+                else if (line.Contains("class") || line.Contains("interface") || line.Contains("abstract") || line.Contains("struct"))
                 {
                     scope = line.Substring(0, line.IndexOf("class")).Replace(" ", "");
                     className = ClassNameHelper(line);
@@ -308,7 +345,7 @@ namespace uDocumentGenerator.Generation
                     break;
                 }
 
-                if (line.Contains("namespace"))
+                else if (line.Contains("namespace"))
                 {
                     nameSpace = line.Substring(line.IndexOf("namespace") + "namespace".Length).Trim(new char[] { ' ', '{' });
                 }

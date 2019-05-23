@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 namespace uDocumentGenerator.Generation
 {
     public class FunctionRepresentation
@@ -10,7 +9,6 @@ namespace uDocumentGenerator.Generation
         string description;
         string scope;
         string func_name;
-
         public string Func_name { get => func_name; set => func_name = value; }
         public string Scope { get => scope; set => scope = value; }
         public string Description { get => description; set => description = value; }

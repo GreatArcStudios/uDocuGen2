@@ -46,6 +46,17 @@ namespace uDocumentGenerator.Helpers
             return cleanedString;
 
         }
+        public static int FindCommentType(string line, string[] searches)
+        {
+            for (int i = 0; i < searches.Length; i++)
+            {
+                if (line.StartsWith(searches[i]))
+                {
+                    return i;
+                }
+            }
+            return -1; 
+        }
     }
 }
 

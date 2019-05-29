@@ -1,4 +1,6 @@
 ﻿
+using System.Collections.Generic;
+
 namespace uDocumentGenerator.Generation
 {  
     /// <summary>
@@ -6,11 +8,12 @@ namespace uDocumentGenerator.Generation
     /// </summary>
     public class DocGen
     {
-        Helpers.ProjectTree projectTree;
+        public static Helpers.ProjectRepresentation projectTree;
         
-        public static void Generate(string filePath)
+        public static void Generate(string filePath, List<string> exclusions)
         {
             
+            projectTree = new Helpers.ProjectRepresentation(filePath, exclusions);
         }
     }
 

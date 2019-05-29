@@ -4,8 +4,8 @@ namespace uDocumentGenerator.Generation
     public class FunctionRepresentation
     {
         // each param is formatted as name, paramtype, and default value
-        List<(string, string, object)> paramList = new List<(string, string, object)>();
-        List<string> modifiers = new List<string>();
+        readonly List<(string, string, object)> paramList = new List<(string, string, object)>();
+        readonly List<string> modifiers = new List<string>();
         string description;
         string scope;
         string func_name;

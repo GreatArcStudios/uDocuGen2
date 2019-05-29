@@ -1,9 +1,14 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using uDocumentGenerator;
+using System.Collections.Generic;
+using uDocumentGenerator.Helpers;
 
 namespace uDocumentGenerator.UI
 {
+    /// <summary>
+    /// test0
+    /// </summary>
     public class GeneratorInterface : EditorWindow
     {
         // ui variables
@@ -18,9 +23,13 @@ namespace uDocumentGenerator.UI
         {
             EditorWindow.GetWindow(typeof(GeneratorInterface));
         }
+        /// <summary>
+        /// test1
+        /// </summary>
         void OnEnable()
         {
         }
+        // test2
         void OnGUI()
         {
             if (EditorGUILayout.DropdownButton(ButtonLabel, FocusType.Keyboard))
@@ -31,7 +40,9 @@ namespace uDocumentGenerator.UI
             EditorGUILayout.Separator();
             EditorGUILayout.Separator();
             if (GUILayout.Button(generateButton)){
-                Generation.DocGen.Generate(filePath);
+                List<string> exclusions = new List<string>();
+                exclusions.Add(TextSanitizer.AppPath + "\\" + "Tests");
+                Generation.DocGen.Generate(filePath, exclusions);
             }
         }
 

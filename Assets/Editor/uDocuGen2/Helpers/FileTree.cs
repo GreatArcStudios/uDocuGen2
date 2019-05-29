@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using uDocumentGenerator.Generation;
 using UnityEngine;
 
 namespace uDocumentGenerator.Helpers
@@ -15,54 +16,81 @@ namespace uDocumentGenerator.Helpers
         public List<FileTree> subDir = new List<FileTree>();
         public string currentDirectory;
         public List<string> filePath;
-        public FileTree(List<string> fPath)
+        // the parents & ancestors of this "file level" 
+        private string prevDirectory;
+        private Generation.FileRepresentation fileRepresentation;
+        /// <summary>
+        /// This constructor is used for instantiating a FileTree
+        /// </summary>
+        /// <param name="fPath"></param>
+        /// <param name="previousDirectory"></param>
+        public FileTree(List<string> fPath, string previousDirectory)
         {
             filePath = fPath;
+            prevDirectory = previousDirectory;
             BuildTree();
+            Console.WriteLine(ToString());
             Debug.Log(ToString());
         }
-        public FileTree(string subDirectoryPath)
+        /// <summary>
+        /// This constructor is used in recursive calls in BuildTree
+        /// </summary>
+        /// <param name="subDirectoryPath"></param>
+        /// <param name="previousDirectory"></param>
+        public FileTree(string subDirectoryPath, string previousDirectory)
         {
             filePath = new List<string>();
             filePath.Add(subDirectoryPath);
+            prevDirectory = previousDirectory;
             BuildTree();
         }
+        /// <summary>
+        /// Builds the tree
+        /// </summary>
         private void BuildTree()
         {
             foreach (string fp in filePath)
             {
                 // if there are more branches to construct
-                if (Regex.Matches(fp, @"\\[^\\]*\\").Count > 1)
+                if (Regex.Matches(fp, @"\\[^\\]*[^\\]").Count > 1)
                 {
-                    var match = Regex.Match(fp, @"\\[^\\]*\\");
+                    var match = Regex.Match(fp, @"\\[^\\]*[^\\]");
                     //Debug.Log(matches);
                     if (match.Success)
                     {
-                        var matchedDirectory = match.Value.Substring(1, match.Value.Length - 2);
+                        var matchedDirectory = match.Value.Substring(1, match.Value.Length - 1);
                         FileTree subDirectory;
 
                         // if the current directory matches the matched directory check for more common subdirectories
-                        // then add the new subDirectory into the subDir of the lastCommonDirectory FileTree
+                        // then add the new subDirectory into the subDir of this FileTree
+                        // this will only execute if there are more than one items in filePath
                         if (currentDirectory == matchedDirectory)
                         {
                             // insert a FileTree in the subdir of lastCommomDirectory
                             FileTree lastCommonDirectory = this;
                             // this will have the file path that isn't common with the rest
-                            string addPath = fp;
-                            var nextFolder = Regex.Match(addPath.Substring(currentDirectory.Length + 1), @"\\[^\\]*\\");
-                            var containsNextStep = false;
+                            string addPath = fp.Substring(currentDirectory.Length + 1);
+                            var nextFolder = Regex.Match(addPath, @"\\[^\\]*[^\\]");
+                            var containsNextStep = true;
+                            var allCommonDirectories = new List<string>();
                             while (containsNextStep)
                             {
+                                containsNextStep = false;
                                 //check if subtrees have next step of the path 
                                 for (var i = 0; i < lastCommonDirectory.subDir.Count; i++)
                                 {
                                     // substr of nextFolder gets rid of slashes
-                                    if (lastCommonDirectory.subDir[i].currentDirectory == nextFolder.Value.Substring(1, nextFolder.Value.Length - 2))
+                                    if (lastCommonDirectory.subDir[i].currentDirectory == nextFolder.Value.Substring(1))
                                     {
                                         containsNextStep = true;
+
+                                        allCommonDirectories.Add(lastCommonDirectory.currentDirectory);
+
                                         lastCommonDirectory = lastCommonDirectory.subDir[i];
-                                        addPath = addPath.Substring(nextFolder.Length + 1);
-                                        nextFolder = Regex.Match(addPath.Substring(nextFolder.Length + 1), @"\\[^\\]*\\");
+
+                                        addPath = addPath.Substring(nextFolder.Length);
+                                        nextFolder = Regex.Match(addPath, @"\\[^\\]*[^\\]");
+
                                         break;
                                     }
                                 }
@@ -72,13 +100,16 @@ namespace uDocumentGenerator.Helpers
                                     break;
                                 }
                             }
-                            subDirectory = new FileTree(addPath);
+                            var commonPath = buildCommonPath(allCommonDirectories) + "\\" + lastCommonDirectory.currentDirectory;
+                            Debug.Log(prevDirectory + "\\" + commonPath);
+                            subDirectory = new FileTree(addPath, prevDirectory + "\\" + commonPath);
                             lastCommonDirectory.subDir.Add(subDirectory);
                         }
                         else
                         {
                             currentDirectory = matchedDirectory;
-                            subDirectory = new FileTree(fp.Substring(currentDirectory.Length + 1));
+                            subDirectory = new FileTree(fp.Substring(currentDirectory.Length + 1), prevDirectory + "\\" + currentDirectory);
+                            subDir.Add(subDirectory);
                         }
                     }
                 }
@@ -86,32 +117,104 @@ namespace uDocumentGenerator.Helpers
                 {
                     //return when we reach a file
                     currentDirectory = fp.Substring(1);
+                    fileRepresentation = new Generation.FileRepresentation(prevDirectory + "\\" + currentDirectory);
                     return;
                 }
             }
 
         }
-        private string strFormated(int depth = 0) 
+        /// <summary>
+        /// Builds a common file path for directories.
+        /// </summary>
+        /// <param name="directories"></param>
+        /// <returns></returns>
+        private string buildCommonPath(List<string> directories)
+        {
+            var path = "";
+            for (int i = 0; i < directories.Count; i++)
+            {
+                string directory = directories[i];
+                if (i > 0)
+                    path += $"\\{directory}";
+                else
+                    path += $"{directory}";
+            }
+            return path;
+        }
+        /// <summary>
+        /// Returns a formatted string of the file tree
+        /// </summary>
+        /// <param name="depth"></param>
+        /// <returns></returns>
+        private string strFormated(int depth)
         {
             var formatted_str = "";
             if (subDir.Count == 0)
             {
-                return " ";
+                return new string(' ', --depth * 5) + currentDirectory + "\n";
             }
             else
             {
-                formatted_str = string.Concat(Enumerable.Repeat(" ", depth)) + $"{currentDirectory}\n"; 
-                foreach(var subDirectroy in subDir)
+                formatted_str = new string(' ', depth * 5) + $"{currentDirectory}\n";
+                var newDepth = ++depth;
+                foreach (var subDirectroy in subDir)
                 {
-                    formatted_str += subDirectroy.strFormated(depth++);
+                    formatted_str += subDirectroy.strFormated(newDepth);
                 }
             }
             return formatted_str;
         }
+        /// <summary>
+        /// Overrides the default ToString method
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
 
-            return strFormated();
+            return strFormated(0);
+        }
+        /// <summary>
+        /// This will return the FileRepresentation of a file if it exists. Otherwise it will return null. The file path should be split among slashes with the last element being the file.cs
+        /// </summary>
+        /// <param name="pathList"></param>
+        /// <returns></returns>
+        public FileRepresentation FindFile(List<string> pathList)
+        {
+            FileRepresentation target = null;
+            // when we should reach the file
+            if (pathList.Count == 1)
+            {
+                if (pathList[0] != currentDirectory)
+                {
+                    return null;
+                }
+                else
+                {
+                    return fileRepresentation;
+                }
+            }
+            else if (pathList[0] != currentDirectory)
+            {
+                return null;
+            }
+            else
+            {
+                var nextFolder = pathList[1];
+                pathList.RemoveAt(0);
+                foreach (var directory in subDir)
+                {
+                    if (directory.currentDirectory == nextFolder)
+                    {
+                        var result = FindFile(pathList);
+                        if (result != null)
+                        {
+                            target = result;
+                            return target;
+                        }
+                    }
+                }
+            }
+            return target;
         }
     }
 }

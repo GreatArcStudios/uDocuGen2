@@ -8,17 +8,27 @@ namespace uDocumentGenerator.Helpers
 {
     /// <summary>
     /// The tree is formatted as follows: 
-    ///     1. a file will have no children (a leaf), i.e, subDir.Length == 0
-    ///     2. a branch will have it's own value and will not end in .cs with non-empty subDir list
+    /// <ul> 
+    ///     <li> 
+    ///         a file will have no children (a leaf), i.e, ```subDir.Length == 0```
+    ///     </li>
+    ///     <li>
+    ///         a branch will have it's own value and will not end in .cs with non-empty subDir list
+    ///     </li>
+    /// </ul>
     /// </summary>
     public class FileTree
     {
+        // If this is not a leaf, this will not be null -> provides the recursive structure of FileTree
         public List<FileTree> subDir = new List<FileTree>();
+        // The file path to the current directory
         public string currentDirectory;
-        public List<string> filePath;
-        // the parents & ancestors of this "file level" 
+        // The file paths of the files in the subDirs/current level
+        public List<string> filePaths;
+        // The parents & ancestors of this "file level" 
         private string prevDirectory;
-        private Generation.FileRepresentation fileRepresentation;
+        // If this ```FileTree``` is a leaf, it will be populated with a ```FileRepresentation```
+        private FileRepresentation fileRepresentation;
         /// <summary>
         /// This constructor is used for instantiating a FileTree
         /// </summary>
@@ -26,7 +36,7 @@ namespace uDocumentGenerator.Helpers
         /// <param name="previousDirectory"></param>
         public FileTree(List<string> fPath, string previousDirectory)
         {
-            filePath = fPath;
+            filePaths = fPath;
             prevDirectory = previousDirectory;
             BuildTree();
             Console.WriteLine(ToString());
@@ -39,17 +49,18 @@ namespace uDocumentGenerator.Helpers
         /// <param name="previousDirectory"></param>
         public FileTree(string subDirectoryPath, string previousDirectory)
         {
-            filePath = new List<string>();
-            filePath.Add(subDirectoryPath);
+            filePaths = new List<string>();
+            filePaths.Add(subDirectoryPath);
             prevDirectory = previousDirectory;
             BuildTree();
         }
         /// <summary>
-        /// Builds the tree
+        /// Builds the FileTree -> contains all the fileReps.  
+        /// This is a recursive data structure.
         /// </summary>
         private void BuildTree()
         {
-            foreach (string fp in filePath)
+            foreach (string fp in filePaths)
             {
                 // if there are more branches to construct
                 if (Regex.Matches(fp, @"\\[^\\]*[^\\]").Count > 1)
@@ -100,7 +111,7 @@ namespace uDocumentGenerator.Helpers
                                     break;
                                 }
                             }
-                            var commonPath = buildCommonPath(allCommonDirectories) + "\\" + lastCommonDirectory.currentDirectory;
+                            var commonPath = BuildCommonPath(allCommonDirectories) + "\\" + lastCommonDirectory.currentDirectory;
                             Debug.Log(prevDirectory + "\\" + commonPath);
                             subDirectory = new FileTree(addPath, prevDirectory + "\\" + commonPath);
                             lastCommonDirectory.subDir.Add(subDirectory);
@@ -128,7 +139,7 @@ namespace uDocumentGenerator.Helpers
         /// </summary>
         /// <param name="directories"></param>
         /// <returns></returns>
-        private string buildCommonPath(List<string> directories)
+        private string BuildCommonPath(List<string> directories)
         {
             var path = "";
             for (int i = 0; i < directories.Count; i++)
@@ -146,7 +157,7 @@ namespace uDocumentGenerator.Helpers
         /// </summary>
         /// <param name="depth"></param>
         /// <returns></returns>
-        private string strFormated(int depth)
+        private string StrFormated(int depth)
         {
             var formatted_str = "";
             if (subDir.Count == 0)
@@ -159,7 +170,7 @@ namespace uDocumentGenerator.Helpers
                 var newDepth = ++depth;
                 foreach (var subDirectroy in subDir)
                 {
-                    formatted_str += subDirectroy.strFormated(newDepth);
+                    formatted_str += subDirectroy.StrFormated(newDepth);
                 }
             }
             return formatted_str;
@@ -171,7 +182,7 @@ namespace uDocumentGenerator.Helpers
         public override string ToString()
         {
 
-            return strFormated(0);
+            return StrFormated(0);
         }
         /// <summary>
         /// This will return the FileRepresentation of a file if it exists. Otherwise it will return null. The file path should be split among slashes with the last element being the file.cs

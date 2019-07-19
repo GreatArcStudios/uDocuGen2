@@ -10,8 +10,12 @@ namespace uDocumentGenerator.Helpers
     public class TextSanitizer
     {
 
+        // The application path
         private static readonly string appPath = Application.dataPath.Replace(@"/", "\\");
 
+        /// <summary>
+        /// The property for AppPath
+        /// </summary>
         public static string AppPath => appPath;
 
         /// <summary>
@@ -67,7 +71,7 @@ namespace uDocumentGenerator.Helpers
         }
 
         /// <summary>
-        /// Removes characters specified from a string. Used in cleaning a line from a file.
+        /// Removes characters specified from a string. Used in cleaning a line from a file. Non-descructive. 
         /// </summary>
         /// <param name="toProcess"></param>
         /// <param name="removeChars"></param>
@@ -83,7 +87,7 @@ namespace uDocumentGenerator.Helpers
 
         }
         /// <summary>
-        /// Finds the comment type from a list of: { "///", "//", "/*", "*", "*/" }
+        /// Finds the comment type from a list of: ```{ "///", "//", "/*", "*", "*/" }```. Returns -1 iff no matches
         /// </summary>
         /// <param name="line"></param>
         /// <param name="searches"></param>

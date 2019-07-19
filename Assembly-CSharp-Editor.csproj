@@ -66,11 +66,14 @@
     <Compile Include="Assets\Editor\uDocuGen2\Generation\DocumentationGenerator.cs" />
     <Compile Include="Assets\Editor\uDocuGen2\Generation\FileRepresentation.cs" />
     <Compile Include="Assets\Editor\uDocuGen2\Generation\FunctionRepresentation.cs" />
-    <Compile Include="Assets\Editor\uDocuGen2\GeneratorInterface.cs" />
+    <Compile Include="Assets\Editor\uDocuGen2\Generation\VariableRepresentation.cs" />
     <Compile Include="Assets\Editor\uDocuGen2\Helpers\FileReader.cs" />
     <Compile Include="Assets\Editor\uDocuGen2\Helpers\FileTree.cs" />
     <Compile Include="Assets\Editor\uDocuGen2\Helpers\ProjectRepresentation.cs" />
     <Compile Include="Assets\Editor\uDocuGen2\Helpers\TextSanitizer.cs" />
+    <Compile Include="Assets\Editor\uDocuGen2\UI\GeneratorInterface.cs" />
+    <None Include="Assets\Editor\uDocuGen2\UI\test.txt" />
+    <None Include="Assets\Editor\uDocuGen2\Libraries\Newtonsoft.Json.xml" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>C:/Users/ericz/Documents/GitHub/uDocuGen2/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>
@@ -313,6 +316,15 @@
     </Reference>
     <Reference Include="SyntaxTree.VisualStudio.Unity.Bridge">
       <HintPath>C:/Program Files (x86)/Microsoft Visual Studio Tools for Unity/16.0/Editor/SyntaxTree.VisualStudio.Unity.Bridge.dll</HintPath>
+    </Reference>
+    <Reference Include="AssetStoreTools">
+      <HintPath>C:/Users/ericz/Documents/GitHub/uDocuGen2/Assets/AssetStoreTools/Editor/AssetStoreTools.dll</HintPath>
+    </Reference>
+    <Reference Include="AssetStoreToolsExtra">
+      <HintPath>C:/Users/ericz/Documents/GitHub/uDocuGen2/Assets/AssetStoreTools/Editor/AssetStoreToolsExtra.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>C:/Users/ericz/Documents/GitHub/uDocuGen2/Assets/Editor/uDocuGen2/Libraries/Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor.Advertisements">
       <HintPath>C:/Users/ericz/Documents/GitHub/uDocuGen2/Library/PackageCache/com.unity.ads@2.0.8/Editor/UnityEditor.Advertisements.dll</HintPath>

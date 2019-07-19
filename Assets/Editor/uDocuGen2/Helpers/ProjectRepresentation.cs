@@ -10,9 +10,13 @@ namespace uDocumentGenerator.Helpers
     /// </summary>
     public class ProjectRepresentation
     {
+        // The path to the specified folder we want to turn into a ```ProjectRepresentation```
         public string folderPath;
+        // The generated ```FileTree``` object. **Contains the information that will be displayed on the website**
         public FileTree fileTree;
+        // A list of the files in the specified folder
         public List<string> fileList;
+        // The directories we don't want processed
         public List<string> directoryExclusionsList;
         public ProjectRepresentation(string fPath, List<string> exclusions)
         {

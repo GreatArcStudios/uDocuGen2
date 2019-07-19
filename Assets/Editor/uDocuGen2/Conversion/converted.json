@@ -1,0 +1,129 @@
+{
+  "folderPath": "C:/Users/ericz/Documents/GitHub/uDocuGen2/Assets/Editor/uDocuGen2/Conversion",
+  "fileTree": {
+    "subDir": [
+      {
+        "subDir": [
+          {
+            "subDir": [
+              {
+                "subDir": [],
+                "currentDirectory": "JsonConverter.cs",
+                "filePath": [
+                  "\\JsonConverter.cs"
+                ],
+                "prevDirectory": "C:\\Users\\ericz\\Documents\\GitHub\\uDocuGen2\\Assets\\Editor\\uDocuGen2\\Conversion",
+                "fileRepresentation": {
+                  "imports": [
+                    "Newtonsoft.Json",
+                    "Newtonsoft.Json.Serialization",
+                    "System",
+                    "System.Collections.Generic",
+                    "System.IO",
+                    "System.Linq",
+                    "System.Reflection",
+                    "uDocumentGenerator.Helpers"
+                  ],
+                  "variables": {
+                    "private": [
+                      {
+                        "attributes": [
+                          "ProjectRepresentation",
+                          ""
+                        ],
+                        "description": "",
+                        "accessMod": "private",
+                        "varName": "projectRepresentation",
+                        "type": "uDocumentGenerator.Helpers.ProjectRepresentation",
+                        "Var_Name": "projectRepresentation",
+                        "Access_Mod": "private",
+                        "Description": "",
+                        "Type": "uDocumentGenerator.Helpers.ProjectRepresentation"
+                      }
+                    ]
+                  },
+                  "inheritance": [
+                    "NO INHERITANCE"
+                  ],
+                  "scope": "public",
+                  "className": "JsonConverter",
+                  "description": null,
+                  "filePath": "C:\\Users\\ericz\\Documents\\GitHub\\uDocuGen2\\Assets\\Editor\\uDocuGen2\\Conversion\\JsonConverter.cs",
+                  "nameSpace": "uDocumentGenerator.Conversion",
+                  "functions": {
+                    "public": [
+                      {
+                        "paramList": [
+                          {
+                            "Item1": "savePath",
+                            "Item2": "System.String",
+                            "Item3": null
+                          }
+                        ],
+                        "modifiers": [],
+                        "description": "",
+                        "access": "public",
+                        "func_name": "ConvertSave",
+                        "Func_name": "ConvertSave",
+                        "Access_Mod": "public",
+                        "Description": ""
+                      },
+                      {
+                        "paramList": [],
+                        "modifiers": [],
+                        "description": "",
+                        "access": "public",
+                        "func_name": "Convert",
+                        "Func_name": "Convert",
+                        "Access_Mod": "public",
+                        "Description": ""
+                      }
+                    ]
+                  },
+                  "fileReader": {
+                    "fileText": null,
+                    "index": 0
+                  },
+                  "accessMods": [
+                    "public",
+                    "protected",
+                    "private",
+                    "internal",
+                    "protected internal",
+                    "private protected"
+                  ],
+                  "isInterface": false,
+                  "isAbstract": false
+                }
+              }
+            ],
+            "currentDirectory": "Conversion",
+            "filePath": [
+              "\\Conversion\\JsonConverter.cs"
+            ],
+            "prevDirectory": "C:\\Users\\ericz\\Documents\\GitHub\\uDocuGen2\\Assets\\Editor\\uDocuGen2",
+            "fileRepresentation": null
+          }
+        ],
+        "currentDirectory": "uDocuGen2",
+        "filePath": [
+          "\\uDocuGen2\\Conversion\\JsonConverter.cs"
+        ],
+        "prevDirectory": "C:\\Users\\ericz\\Documents\\GitHub\\uDocuGen2\\Assets\\Editor",
+        "fileRepresentation": null
+      }
+    ],
+    "currentDirectory": "Editor",
+    "filePath": [
+      "\\Editor\\uDocuGen2\\Conversion\\JsonConverter.cs"
+    ],
+    "prevDirectory": "C:\\Users\\ericz\\Documents\\GitHub\\uDocuGen2\\Assets",
+    "fileRepresentation": null
+  },
+  "fileList": [
+    "\\Editor\\uDocuGen2\\Conversion\\JsonConverter.cs"
+  ],
+  "directoryExclusionsList": [
+    "\\Tests"
+  ]
+}

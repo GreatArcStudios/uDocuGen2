@@ -16,6 +16,7 @@ namespace uDocumentGenerator.Helpers
         private string fileString;
         public FileReader(string filePath)
         {
+            filePath = TextSanitizer.ReverseSlashes(filePath);
             fileText = File.ReadAllLines(filePath);
             fileString = File.ReadAllText(filePath);
         }

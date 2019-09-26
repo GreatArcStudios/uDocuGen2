@@ -55,7 +55,7 @@ namespace uDocumentGenerator.Generation
         private bool isAbstract = false;
         public FileRepresentation(string fp)    
         {
-            filePath = fp;
+            filePath = TextSanitizer.ReverseSlashes(fp);
             fileReader = new FileReader(fp);
             ExtractImports();
             ExtractClassInformation();

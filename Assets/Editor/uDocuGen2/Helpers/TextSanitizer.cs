@@ -51,6 +51,17 @@ namespace uDocumentGenerator.Helpers
             {
                 var fixedPath = filePaths[i].Replace(@"/", "\\");
                 filePaths[i] = fixedPath;
+            }   
+        }
+
+        public static string ReverseSlashes(string filePath)
+        {
+            if (Application.platform == RuntimePlatform.WindowsEditor) {
+                return filePath.Replace(@"/", "\\");
+            }
+            else
+            {
+                return filePath.Replace("\\", @"/");
             }
         }
 

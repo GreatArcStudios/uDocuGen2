@@ -36,7 +36,7 @@ namespace uDocumentGenerator.Generation
         /// <param name="projDescription"></param>
         /// <param name="authorInfo"></param>
         /// <param name="savePath"></param>
-        public static void AppendUserInfo(string acknowledgements, string projDescription, List<string> authorInfo, string savePath)
+        public static void AppendUserInfo(string acknowledgements, string projDescription, List<string> authorInfo, string savePath, string gettingStarted)
         {
             List<string> config = File.ReadAllLines(savePath + "//config.js").ToList();
             config[config.Count - 1] += ";";
@@ -49,6 +49,7 @@ namespace uDocumentGenerator.Generation
             }
             userInfo += "};";
             config.Add(userInfo);
+            config.Add("const gettingStarted = " + gettingStarted + ";");
             File.WriteAllText(savePath + "//config.js", String.Join(String.Empty, config));
         }
     }

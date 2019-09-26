@@ -28,10 +28,13 @@ namespace uDocumentGenerator.UI
         public GUIContent WebsitePathLabel = new GUIContent("Directory to react project");
 
         // Label next to acknowledgement directory chooser button
-        public GUIContent acknowledgementFp = new GUIContent("Path to markdown file");   
+        public GUIContent acknowledgementLabel = new GUIContent("Path to markdown file");   
         
         // Label next to description directory chooser button
-        public GUIContent descriptionFp = new GUIContent("Path to markdown file");
+        public GUIContent descriptionLabel = new GUIContent("Path to markdown file");
+
+        // Label next to getting started directory chooser button
+        public GUIContent gettingStartedLabel = new GUIContent("Path to markdown file");
 
         // The file path for the project
         string projectFilePath = "";
@@ -45,11 +48,20 @@ namespace uDocumentGenerator.UI
         // The file path for the description file
         string descriptionFilePath = "";
 
+        // The file path for the description file
+        string gettingStartedFilePath = "";
+
         // The acknowledgements file as a ```string```
-        string acknowledgements;
+        // \n Initalize it to ```""``` so that the app can run with out a specified file.
+        string acknowledgements = "";
 
         // The description file as a ```string```
-        string description;
+        // \n Initalize it to ```""``` so that the app can run with out a specified file.
+        string description = ""; 
+        
+        // The getting started file as a ```string```
+        // \n Initalize it to ```""``` so that the app can run with out a specified file.
+        string gettingStarted = "";
 
         // Array Index is used in finiding the line index of a term in an array
         private int ArrayIndex(List<string> TextArray, string Search)
@@ -133,10 +145,10 @@ namespace uDocumentGenerator.UI
 
             EditorGUILayout.BeginHorizontal();
             GUILayout.Label("Acknowledgement file:", EditorStyles.boldLabel);
-            if (EditorGUILayout.DropdownButton(acknowledgementFp, FocusType.Keyboard))
+            if (EditorGUILayout.DropdownButton(acknowledgementLabel, FocusType.Keyboard))
             {
-                acknowledgementFilePath = EditorUtility.OpenFilePanelWithFilters("Choose acknowledgement file file path", Application.dataPath, new string[] {"Text files","txt", "Markdown", "md", "Any" ,"*"});
-                acknowledgementFp = new GUIContent(acknowledgementFilePath);
+                acknowledgementFilePath = EditorUtility.OpenFilePanelWithFilters("Choose acknowledgement file", Application.dataPath, new string[] { "Markdown", "md", "Text files","txt", "Any" ,"*"});
+                acknowledgementLabel = new GUIContent(acknowledgementFilePath);
             }
             EditorGUILayout.EndHorizontal();
 
@@ -144,10 +156,21 @@ namespace uDocumentGenerator.UI
 
             EditorGUILayout.BeginHorizontal();
             GUILayout.Label("Description file:", EditorStyles.boldLabel);
-            if (EditorGUILayout.DropdownButton(descriptionFp, FocusType.Keyboard))
+            if (EditorGUILayout.DropdownButton(descriptionLabel, FocusType.Keyboard))
             {
-                descriptionFilePath = EditorUtility.OpenFilePanelWithFilters("Choose description file file path", Application.dataPath, new string[] { "Text files", "txt", "Markdown", "md", "Any" ,"*" });
-                descriptionFp = new GUIContent(descriptionFilePath);
+                descriptionFilePath = EditorUtility.OpenFilePanelWithFilters("Choose description file", Application.dataPath, new string[] { "Markdown", "md", "Text files", "txt", "Any" ,"*" });
+                descriptionLabel = new GUIContent(descriptionFilePath);
+            }
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.Separator();
+
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label("Getting started file:", EditorStyles.boldLabel);
+            if (EditorGUILayout.DropdownButton(gettingStartedLabel, FocusType.Keyboard))
+            {
+                gettingStartedFilePath = EditorUtility.OpenFilePanelWithFilters("Choose getting started file", Application.dataPath, new string[] { "Markdown", "md", "Text files", "txt", "Any", "*" });
+                gettingStartedLabel = new GUIContent(gettingStartedFilePath);
             }
             EditorGUILayout.EndHorizontal();
 
@@ -157,14 +180,15 @@ namespace uDocumentGenerator.UI
             {
                 List<string> exclusions = new List<string>();
                 exclusions.Add(TextSanitizer.AppPath + "\\" + "Tests");
-                acknowledgements = $"\"{new FileReader(acknowledgementFilePath).ToString()}\"";
-                description = $"\"{new FileReader(descriptionFilePath).ToString()}\"";
+                acknowledgements = $"`{new FileReader(acknowledgementFilePath).ToString().Replace("`", "\\`")}`";
+                description = $"`{new FileReader(descriptionFilePath).ToString().Replace("`", "\\`")}`";
+                gettingStarted = $"`{new FileReader(gettingStartedFilePath).ToString().Replace("`", "\\`")}`";
                 List<string> authorInfo = new List<string>();
                 authorInfo.Add($"\"projectName\": \"{projectName}\"");
                 authorInfo.Add($"\"authorName\": \"{authorName}\"");
                 authorInfo.Add($"\"version\": \"{version}\"");
                 DocGen.Generate(projectFilePath, websiteFilePath, exclusions);
-                DocGen.AppendUserInfo(acknowledgements, description, authorInfo, websiteFilePath);
+                DocGen.AppendUserInfo(acknowledgements, description, authorInfo, websiteFilePath, gettingStarted);
             }
             EditorGUILayout.Separator();
 
